@@ -1,3 +1,6 @@
+;; This buffer is for text that is not saved, and for Lisp evaluation.
+;; To create a file, visit it with C-x C-f and enter text in its buffer.
+
 #!/bin/sh
 
 fifo="/tmp/panel-fifo"
@@ -31,7 +34,7 @@ P="%{O20}"
 
 # WMHDMI-1:oI:oII:OIII:oIV:fV:fVI:fVII:fVIII:fIX:fX:LT:TT:G
 
-PANEL_GEOMETRY=$(xrandr --current | grep -w connected | cut -d ' ' -f 3 | sed -E 's/x[^\+]*/x42/')
+PANEL_GEOMETRY=$(xrandr --current | grep -w "connected primary" | cut -d ' ' -f 4 | sed -E 's/x[^\+]*/x42/')
 
 while true
 do
@@ -57,6 +60,9 @@ do
                 IFS=':' read -ra WM <<< "${line#'WM'}"
                 for x in "${WM[@]}"; do
                     case $x in
+                        m*|M*)
+                            wm="${x:1} $wm %{F$COLOR_FOCUSED}%{B$COLOR_FOCUSED_BACKGROUND}"
+                            ;;
                         O*|F*) # Focused and free focused
                             wm="$wm %{F$COLOR_FOCUSED}%{B$COLOR_FOCUSED_BACKGROUND} ${x:1}"
                             ;;
@@ -77,7 +83,8 @@ do
         esac
         echo "%{T1}%{l}$P$wm %{c}$title%{r}%{T2}$volume$ipv6$ipv4$P$clock$P"
     fi
-done < "$fifo" | lemonbar -p -b -g $PANEL_GEOMETRY -f $FONT -o 0
+    #done < "$fifo" | lemonbar -p -b -g $PANEL_GEOMETRY -f $FONT -o 0
+done < "$fifo" | lemonbar -p -b -g 3000x100+100+100 -f $FONT -o 0
 
 echo "---END---"
 
